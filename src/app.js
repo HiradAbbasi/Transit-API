@@ -6,8 +6,6 @@ const orginForm = document.querySelector('.origin-form');
 const destinationForm = document.querySelector('.destination-form');
 const originUL = document.querySelector('.origins');
 const destinationUL = document.querySelector('.destinations');
-const originContainer = document.querySelector('.origin-container');
-const destinationContainer = document.querySelector('.destination-container');
 
 let address = '';
 let allPOI = '';
@@ -61,7 +59,7 @@ async function testone(location, container) {
 	});
 }
 
-originContainer.onclick = function(e) {
+originUL.onclick = function(e) {
 	const originItem = e.target.closest('.origins li');
 	
 	allPOI = document.querySelectorAll('.origins li'); 
@@ -69,10 +67,12 @@ originContainer.onclick = function(e) {
 		element.classList.remove('selected');
 	});
 	
-	originItem.classList.toggle('selected');	
+	originItem.classList.toggle('selected');
+	originLocationLAT = originItem.dataset.lat;	
+	originLocationLNG = originItem.dataset.long;	
 }
 
-destinationContainer.onclick = function(e) {
+destinationUL.onclick = function(e) {
 	const destinationItem = e.target.closest('.destinations li');
 	
 	allPOI = document.querySelectorAll('.destinations li'); 
@@ -81,18 +81,18 @@ destinationContainer.onclick = function(e) {
 	});
 	
 	destinationItem.classList.toggle('selected');	
+	destinationLocationLAT = destinationItem.dataset.lat;	
+	destinationLocationLNG = destinationItem.dataset.long;	
+}
+
+document.querySelector('.plan-trip').onclick = function(e) {
+	//Add a method that checks to see if the long and lat actualy have values
+	testtwo();
 }
 
 async function testtwo() {
 	const response = await fetch(`${winnipegTransitBaseURL}origin=geo/${originLocationLAT},${originLocationLNG}${winnipegTransitAPI_KEY}&destination=geo/${destinationLocationLAT},${destinationLocationLNG}`);
 	const JSON = await response.json();
-	console.log(JSON);
+	console.log(JSON['query-time']);
+	console.log(JSON.plans);	
 }
-testtwo();
-
-
-// `${winnipegTransitBaseURL}origin=geo/49.8795,-97.1444${winnipegTransitAPI_KEY}&destination=geo/49.8196,-97.203907`;
-// `${mapBoxAPI_KEY}CIneplex.json${mapBoxAPI_KEY}&limit=10&bbox=-97.325875,49.766204,-96.953987,49.99275`;
-
-// `${mapBoxBaseURL}River.json${mapBoxAPI_KEY}&limit=10&bbox=-97.325875,49.766204,-96.953987,49.99275`;
-// `${mapBoxBaseURL}CIneplex.json${mapBoxAPI_KEY}&limit=10&bbox=-97.325875,49.766204,-96.953987,49.99275`;
