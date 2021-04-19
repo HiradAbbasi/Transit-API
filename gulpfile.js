@@ -1,25 +1,18 @@
 const gulp = require('gulp');
 const browserSync = require('browser-sync').create();
-const imagemin = require('gulp-imagemin');
 const cssMinify = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 
 function minifyJS() {
-	return gulp.src('src/js/*.js')
+	return gulp.src('src/*.js')
 		.pipe(uglify())
-		.pipe(gulp.dest('dist/js'));
-}
-
-function minifyImages() {
-	return gulp.src('src/images/*')
-		.pipe(imagemin())
-		.pipe(gulp.dest('dist/images'));
+		.pipe(gulp.dest('dist/'));
 }
 
 function minifyCSS() {
-	return gulp.src('src/css/*.css')
+	return gulp.src('src/*.css')
 		.pipe(cssMinify())
-		.pipe(gulp.dest('dist/css/'));
+		.pipe(gulp.dest('dist/'));
 }
 
 function copyHTML() {
@@ -36,16 +29,14 @@ function sync() {
 }
 
 function watch() {
-  gulp.watch("src/css/*.css", minifyCSS).on('change', browserSync.reload);
-  gulp.watch("src/js/*.js", minifyJS).on('change', browserSync.reload);
-  gulp.watch("src/images/*", minifyImages).on('change', browserSync.reload);
+  gulp.watch("src/*.css", minifyCSS).on('change', browserSync.reload);
+  gulp.watch("src/*.js", minifyJS).on('change', browserSync.reload);
   gulp.watch("src/index.html", copyHTML).on('change', browserSync.reload);
 }
 
 exports.default = gulp.series(
   gulp.parallel(
     copyHTML,
-    minifyImages, 
     minifyCSS, 
     minifyJS, 
   ), 
