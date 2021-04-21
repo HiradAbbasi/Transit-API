@@ -11,11 +11,9 @@ const destinationUL = document.querySelector('.destinations');
 const myTripContainer = document.querySelector('.my-trip');
 
 let address = '';
-let allPOI = '';
-let destinationLocationLAT = '';
-let destinationLocationLNG = '';
-let originLocationLAT = '';
-let originLocationLNG = '';
+let allLocations = '';
+let destinationLocation = [];
+let originLocation = [];
 
 orginForm.onsubmit = function(e) {
   e.preventDefault();
@@ -47,52 +45,49 @@ async function searchForMatchingLocations(location, container) {
 
 originUL.onclick = function(e) {
   const originItem = e.target.closest('.origins li');
-
-  allPOI = document.querySelectorAll('.origins li');
-  allPOI.forEach(element => {
-    element.classList.remove('selected');
-  });
-
+  cleanDOM('origins');
   originItem.classList.toggle('selected');
-  originLocationLAT = originItem.dataset.lat;
-  originLocationLNG = originItem.dataset.long;
+  originLocation = [originItem.dataset.lat, originItem.dataset.long];
 }
 
 destinationUL.onclick = function(e) {
   const destinationItem = e.target.closest('.destinations li');
+  cleanDOM('destinations');
+  destinationItem.classList.toggle('selected');
+  destinationLocation = [destinationItem.dataset.lat, destinationItem.dataset.long];
+}
 
-  allPOI = document.querySelectorAll('.destinations li');
-  allPOI.forEach(element => {
+function cleanDOM(container) {
+  allLocations = document.querySelectorAll(`.${container} li`);
+  allLocations.forEach(element => {
     element.classList.remove('selected');
   });
-
-  destinationItem.classList.toggle('selected');
-  destinationLocationLAT = destinationItem.dataset.lat;
-  destinationLocationLNG = destinationItem.dataset.long;
 }
 
-document.querySelector('.plan-trip').onclick = function(e) {
-  //Add a method that checks to see if the long and lat actualy have values
-  testtwo();
+document.querySelector('.plan-trip').onclick = function() {
+  if (originLocation.length > 0 && destinationLocation.length > 0) {
+    planTripDirections();
+  }
 }
 
-async function testtwo() {
-  const response = await fetch(`${winnipegTransitBaseURL}origin=geo/${originLocationLAT},${originLocationLNG}${winnipegTransitAPI_KEY}&destination=geo/${destinationLocationLAT},${destinationLocationLNG}`);
+async function planTripDirections() {
+  const response = await fetch(`${winnipegTransitBaseURL}origin=geo/${originLocation[0]},${originLocation[1]}${winnipegTransitAPI_KEY}&destination=geo/${destinationLocation[0]},${destinationLocation[1]}`);
   const JSON = await response.json();
 
   const resultOne = JSON.plans.sort(function(a, b) {
     return new Date(a.times.end) - new Date(b.times.end);
   });
 
-  let filtered = resultOne.filter(doesItOccurMultipleTimes)
+  let filtered = resultOne.filter(duplicationOccurrence)
 
-  function doesItOccurMultipleTimes(value) {
+  function duplicationOccurrence(value) {
     if (value.times.end === resultOne[0].times.end) {
       return value;
     }
   }
 
-  let shortestDuration = filtered.reduce((prev, current) => (prev.times.end < current.times.end) ? prev : current);
+  let shortestDuration = filtered.reduce((prev, current) => (prev.times.durations.total < current.times.durations.total) ? prev : current);
+
   myTripContainer.insertAdjacentHTML('beforeend', `
     <li><span class="material-icons">exit_to_app</span> Depart at ${(new Date(shortestDuration.segments[0].times.start).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true, second:'2-digit'})).replace(/^(?:00:)?0?/, '')}</li>
   `);
