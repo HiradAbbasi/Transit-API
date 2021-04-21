@@ -34,8 +34,7 @@ ul {
 
 .origins>li.selected,
 .destinations>li.selected {
-  background-color: red;
-  /* background-color: #f2f3ff; */
+  background-color: #b8badd;
 }
 
 input {
@@ -58,7 +57,7 @@ input:focus {
 .plan-trip {
   height: 40px;
   border: 0;
-  background: #4146df;
+  background: #7174d6;
   font-size: 17px;
   color: white;
   cursor: pointer;
