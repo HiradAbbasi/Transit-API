@@ -21,12 +21,11 @@ async function searchForMatchingLocations(location, container) {
   const response = await fetch(`${mapBoxBaseURL}${location}.json?access_token=${mapBoxAPI_KEY}&limit=10&${bbox}`);
   const JSON = await response.json();
 
-  JSON.features.forEach(element => {
-    address = (element.properties.address === undefined ? address = element.context[1].text : element.properties.address);
-
+  JSON.features.forEach(features => {
+    address = (features.properties.address === undefined ? address = features.context[1].text : features.properties.address);
     document.querySelector(`.${container}`).insertAdjacentHTML('beforeend', `
-      <li data-long="${element.center[0]}" data-lat="${element.center[1]}">
-        <div class="name">${element.text}</div>
+      <li data-long="${features.center[0]}" data-lat="${features.center[1]}">
+        <div class="name">${features.text}</div>
         <div>${address}</div>
       </li>
     `);
@@ -39,36 +38,36 @@ async function planTripDirections() {
   sortedPlans = JSON.plans.filter(value => value.times.end === JSON.plans[0].times.end);
   shortestDuration = sortedPlans.reduce((prev, current) => (prev.times.durations.total < current.times.durations.total) ? prev : current);
 
-  tripContainer.insertAdjacentHTML('afterbegin', `
+  tripContainer.insertAdjacentHTML('beforeend', `
     <li><span class="material-icons">exit_to_app</span> Depart at ${timeFormatted(new Date(shortestDuration.times.start))}</li>
   `);
 
-  shortestDuration.segments.forEach(element => {
-    if (element.type === 'walk') {
-      if (element.to === undefined || element.to.destination !== undefined) {
-        tripContainer.insertAdjacentHTML('afterbegin', `
-          <li><span class="material-icons">directions_walk</span>Walk for ${element.times.durations.total} minutes to your destination, arriving at ${timeFormatted(new Date(element.times.end))}</li>
+  shortestDuration.segments.forEach(segment => {
+    if (segment.type === 'walk') {
+      if (segment.to === undefined || segment.to.destination !== undefined) {
+        tripContainer.insertAdjacentHTML('beforeend', `
+          <li><span class="material-icons">directions_walk</span>Walk for ${segment.times.durations.total} minutes to your destination, arriving at ${timeFormatted(new Date(segment.times.end))}</li>
         `);
       } else {
-        tripContainer.insertAdjacentHTML('afterbegin', `
-          <li><span class="material-icons">directions_walk</span>Walk for ${element.times.durations.total} minutes to stop #${element.to.stop.key} - ${element.to.stop.name}</li>
+        tripContainer.insertAdjacentHTML('beforeend', `
+          <li><span class="material-icons">directions_walk</span>Walk for ${segment.times.durations.total} minutes to stop #${segment.to.stop.key} - ${segment.to.stop.name}</li>
         `);
       }
-    } else if (element.type === 'ride') {
-      let name;
+    } else if (segment.type === 'ride') {
+      let typeOfBus;
 
-      if (element.route['badge-label'] === "B") {
-        name = "BLUE";
+      if (segment.route['badge-label'] === "B") {
+        typeOfBus = "BLUE";
       } else {
-        name = element.route.name;
+        typeOfBus = segment.route.name;
       }
 
-      tripContainer.insertAdjacentHTML('afterbegin', `
-        <li><span class="material-icons">directions_bus</span>Ride the ${name} for ${element.times.durations.total} minutes.</li>
+      tripContainer.insertAdjacentHTML('beforeend', `
+        <li><span class="material-icons">directions_bus</span>Ride the ${typeOfBus} for ${segment.times.durations.total} minutes.</li>
       `);
-    } else if (element.type === 'transfer') {
-      tripContainer.insertAdjacentHTML('afterbegin', `
-        <li><span class="material-icons">transfer_within_a_station</span>Transfer from stop #${element.from.stop.key} - ${element.from.stop.name} to stop #${element.to.stop.key} - ${element.to.stop.name}</li>
+    } else if (segment.type === 'transfer') {
+      tripContainer.insertAdjacentHTML('beforeend', `
+        <li><span class="material-icons">transfer_within_a_station</span>Transfer from stop #${segment.from.stop.key} - ${segment.from.stop.name} to stop #${segment.to.stop.key} - ${segment.to.stop.name}</li>
       `);
     }
   });
@@ -80,8 +79,8 @@ function timeFormatted(originalFormat) {
 
 function cleanDOM(container) {
   allLocations = document.querySelectorAll(`.${container} li`);
-  allLocations.forEach(element => {
-    element.classList.remove('selected');
+  allLocations.forEach(location => {
+    location.classList.remove('selected');
   });
 }
 
