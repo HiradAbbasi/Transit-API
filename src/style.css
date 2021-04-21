@@ -34,7 +34,8 @@ ul {
 
 .origins>li.selected,
 .destinations>li.selected {
-  background-color: #f2f3ff;
+  background-color: red;
+  /* background-color: #f2f3ff; */
 }
 
 input {
