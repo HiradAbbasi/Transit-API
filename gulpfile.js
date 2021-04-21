@@ -4,15 +4,15 @@ const cssMinify = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 
 function minifyJS() {
-  return gulp.src('src/*.js')
+  return gulp.src('src/js/*.js')
     .pipe(uglify())
-    .pipe(gulp.dest('dist/'));
+    .pipe(gulp.dest('dist/js'));
 }
 
 function minifyCSS() {
-  return gulp.src('src/*.css')
+  return gulp.src('src/css/*.css')
     .pipe(cssMinify())
-    .pipe(gulp.dest('dist/'));
+    .pipe(gulp.dest('dist/css'));
 }
 
 function copyHTML() {
