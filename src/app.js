@@ -36,41 +36,46 @@ async function searchForMatchingLocations(location, container) {
 async function planTripDirections() {
   const response = await fetch(`${winnipegTransitBaseURL}origin=geo/${originLocation[0]},${originLocation[1]}${winnipegTransitAPI_KEY}&destination=geo/${destinationLocation[0]},${destinationLocation[1]}`);
   const JSON = await response.json();
-
   sortedPlans = JSON.plans.filter(value => value.times.end === JSON.plans[0].times.end);
   shortestDuration = sortedPlans.reduce((prev, current) => (prev.times.durations.total < current.times.durations.total) ? prev : current);
 
-  tripContainer.insertAdjacentHTML('beforeend', `
-    <li><span class="material-icons">exit_to_app</span> Depart at ${(new Date(shortestDuration.segments[0].times.start).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true, second:'2-digit'})).replace(/^(?:00:)?0?/, '')}</li>
+  tripContainer.insertAdjacentHTML('afterbegin', `
+    <li><span class="material-icons">exit_to_app</span> Depart at ${timeFormatted(new Date(shortestDuration.times.start))}</li>
   `);
 
   shortestDuration.segments.forEach(element => {
     if (element.type === 'walk') {
       if (element.to === undefined || element.to.destination !== undefined) {
-        tripContainer.insertAdjacentHTML('beforeend', `
-          <li><span class="material-icons">directions_walk</span>Walk for ${element.times.durations.total} minutes to your destination, arriving at ${(new Date(element.times.end).toLocaleTimeString('en-US', {hour: '2-digit', minute:'2-digit', hour12: true, second:'2-digit'})).replace(/^(?:00:)?0?/, '')}</li>
+        tripContainer.insertAdjacentHTML('afterbegin', `
+          <li><span class="material-icons">directions_walk</span>Walk for ${element.times.durations.total} minutes to your destination, arriving at ${timeFormatted(new Date(element.times.end))}</li>
         `);
       } else {
-        tripContainer.insertAdjacentHTML('beforeend', `
+        tripContainer.insertAdjacentHTML('afterbegin', `
           <li><span class="material-icons">directions_walk</span>Walk for ${element.times.durations.total} minutes to stop #${element.to.stop.key} - ${element.to.stop.name}</li>
         `);
       }
     } else if (element.type === 'ride') {
       let name;
+
       if (element.route['badge-label'] === "B") {
         name = "BLUE";
       } else {
         name = element.route.name;
       }
-      tripContainer.insertAdjacentHTML('beforeend', `
+
+      tripContainer.insertAdjacentHTML('afterbegin', `
         <li><span class="material-icons">directions_bus</span>Ride the ${name} for ${element.times.durations.total} minutes.</li>
       `);
     } else if (element.type === 'transfer') {
-      tripContainer.insertAdjacentHTML('beforeend', `
+      tripContainer.insertAdjacentHTML('afterbegin', `
         <li><span class="material-icons">transfer_within_a_station</span>Transfer from stop #${element.from.stop.key} - ${element.from.stop.name} to stop #${element.to.stop.key} - ${element.to.stop.name}</li>
       `);
     }
   });
+}
+
+function timeFormatted(originalFormat) {
+  return originalFormat.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
 function cleanDOM(container) {
