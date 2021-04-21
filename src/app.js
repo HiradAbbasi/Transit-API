@@ -4,7 +4,7 @@ const winnipegTransitAPI_KEY = '&api-key=ZPFv2Zx6ny1KrlPKnfe';
 const winnipegTransitBaseURL = 'https://api.winnipegtransit.com/v3/trip-planner.json?';
 const bbox = 'bbox=-97.325875,49.766204,-96.953987,49.99275';
 
-const orginForm = document.querySelector('.origin-form');
+const originForm = document.querySelector('.origin-form');
 const destinationForm = document.querySelector('.destination-form');
 const originUL = document.querySelector('.origins');
 const destinationUL = document.querySelector('.destinations');
@@ -84,10 +84,10 @@ function cleanDOM(container) {
   });
 }
 
-orginForm.onsubmit = function(e) {
+originForm.onsubmit = function(e) {
   e.preventDefault();
   originUL.textContent = '';
-  searchForMatchingLocations(orginForm.querySelector('input').value, 'origins');
+  searchForMatchingLocations(originForm.querySelector('input').value, 'origins');
 }
 
 destinationForm.onsubmit = function(e) {

@@ -4,20 +4,20 @@ const cssMinify = require('gulp-clean-css');
 const uglify = require('gulp-uglify');
 
 function minifyJS() {
-	return gulp.src('src/*.js')
-		.pipe(uglify())
-		.pipe(gulp.dest('dist/'));
+  return gulp.src('src/*.js')
+    .pipe(uglify())
+    .pipe(gulp.dest('dist/'));
 }
 
 function minifyCSS() {
-	return gulp.src('src/*.css')
-		.pipe(cssMinify())
-		.pipe(gulp.dest('dist/'));
+  return gulp.src('src/*.css')
+    .pipe(cssMinify())
+    .pipe(gulp.dest('dist/'));
 }
 
 function copyHTML() {
-	return gulp.src('src/*.html')
-		.pipe(gulp.dest('dist'));
+  return gulp.src('src/*.html')
+    .pipe(gulp.dest('dist'));
 }
 
 function sync() {
@@ -37,11 +37,11 @@ function watch() {
 exports.default = gulp.series(
   gulp.parallel(
     copyHTML,
-    minifyCSS, 
-    minifyJS, 
-  ), 
+    minifyCSS,
+    minifyJS,
+  ),
   gulp.parallel(
     sync,
     watch
-  ) 
+  )
 );
