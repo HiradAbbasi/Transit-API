@@ -6,6 +6,7 @@ const orginForm = document.querySelector('.origin-form');
 const destinationForm = document.querySelector('.destination-form');
 const originUL = document.querySelector('.origins');
 const destinationUL = document.querySelector('.destinations');
+const myTripContainer = document.querySelector('.my-trip');
 
 let address = '';
 let allPOI = '';
@@ -13,7 +14,7 @@ let destinationLocationLAT = '';
 let destinationLocationLNG = '';
 let originLocationLAT = '';
 let originLocationLNG = '';
-
+let testArr = [];
 
 orginForm.onsubmit = function(e) {
 	e.preventDefault();
@@ -93,6 +94,55 @@ document.querySelector('.plan-trip').onclick = function(e) {
 async function testtwo() {
 	const response = await fetch(`${winnipegTransitBaseURL}origin=geo/${originLocationLAT},${originLocationLNG}${winnipegTransitAPI_KEY}&destination=geo/${destinationLocationLAT},${destinationLocationLNG}`);
 	const JSON = await response.json();
-	console.log(JSON['query-time']);
-	console.log(JSON.plans);	
+		
+	const resultOne = JSON.plans.sort(function(a,b){
+		return new Date(a.times.end) - new Date(b.times.end);
+	});
+	
+	let filtered = resultOne.filter(doesItOccurMultipleTimes)
+	
+	function doesItOccurMultipleTimes(value) {
+		if(value.times.end === resultOne[0].times.end){
+			return value;
+		}
+	}
+	
+	let shortestDuration = filtered.reduce((prev, current) => (prev.times.end < current.times.end) ? prev : current);
+	console.log(shortestDuration.segments);
+
+	shortestDuration.segments.forEach(element => {
+		myTripContainer.insertAdjacentHTML('afterbegin', `
+			<li><span class="material-icons">exit_to_app</span> Depart at ${shortestDuration}</li>
+		`);
+		
+		if(element.type === 'walk') {
+			myTripContainer.insertAdjacentHTML('afterbegin', `
+				<li><span class="material-icons">directions_walk</span> Walk for ${element.times.durations.total} minutes to stop #${element.to.stop.key} - ${element.to.stop.name}</li>
+			`);
+		} else if (element.type === 'ride'){
+			myTripContainer.insertAdjacentHTML('afterbegin', `
+				<li><span class="material-icons">exit_to_app</span> Depart at 9:55:00 AM.</li>
+			`);
+		}	
+		// } else if (element.type === 'transfer'){ 
+		// 	myTripContainer.insertAdjacentHTML('afterbegin', `
+		// 		<li><span class="material-icons">exit_to_app</span> Depart at 9:55:00 AM.</li>
+		// 	`)	
+		// }
+	});
 }
+
+
+{/* <li><span class="material-icons">directions_walk</span>Walk for 6 minutes to stop #50577 - Northbound St Mary's at Avalon</li>
+<li><span class="material-icons">directions_bus</span>Ride the Route 14 Ellice-St. Mary's for 23 minutes.</li>
+<li><span class="material-icons">transfer_within_a_station</span>Transfer from stop #10643 - Northbound Fort at Graham to stop #10611 - Eastbound Graham at Fort (Wpg Square)</li>
+<li><span class="material-icons">directions_bus</span>Ride the Route 16 Selkirk-Osborne for 16 minutes.</li>
+<li><span class="material-icons">transfer_within_a_station</span>Transfer from stop #30296 - Westbound Selkirk at Arlington to stop #30295 - Northbound Arlington at Selkirk</li>
+<li><span class="material-icons">directions_bus</span>Ride the Route 71 Arlington for 13 minutes.</li>
+<li><span class="material-icons">directions_walk</span>Walk for 3 minutes to your destination, arriving at 11:00:00 AM</li> */}
+
+
+// exit_to_app
+// directions_walk
+// directions_bus
+// transfer_within_a_station
